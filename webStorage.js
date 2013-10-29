@@ -1,4 +1,3 @@
-
 // Cookie setter and getter
 var docCookies = {
   getItem: function (sKey) {
@@ -28,10 +27,10 @@ var docCookies = {
     if (!sKey || !this.hasItem(sKey)) { return false; }
     document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + ( sDomain ? "; domain=" + sDomain : "") + ( sPath ? "; path=" + sPath : "");
     return true;
+  },
+  hasItem: function (sKey) {
+    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
   }
-  // hasItem: function (sKey) {
-  //   return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
-  // }
 };
 
 // Actions : set, remove, clear, get.
