@@ -29,12 +29,12 @@ var docCookies = {
     document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + ( sDomain ? "; domain=" + sDomain : "") + ( sPath ? "; path=" + sPath : "");
     return true;
   }
-  // hasItem: function (sKey) {
-  //   return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
-  // }
+  hasItem: function (sKey) {
+    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+  }
 };
 
-// Actions : set, remove, clear, get.
+// Actions : get, set, remove, keys.
 var webStorage = function(action, key, value) {
 	
 	// Local Storage detection
@@ -71,9 +71,15 @@ var webStorage = function(action, key, value) {
 		} else {
 			return docCookies.removeItem(key);
 		}
-	  case 'clear':
-	    window.localStorage.clear();
-		window.sessionStorage.clear();		
-	    break;
+	  case 'keys':
+      var keyArr = [];
+      if (hasStorage) {
+         for (key in window.localStorage) {
+          keyArr.push(key);
+         }
+        return keyArr;
+      } else {
+        return docCookies.keys();
+      }
 	}
 };	
