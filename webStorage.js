@@ -1,3 +1,4 @@
+
 // Cookie setter and getter
 var docCookies = {
   getItem: function (sKey) {
@@ -22,55 +23,66 @@ var docCookies = {
     document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
     return true;
   },
-  
+
   removeItem: function (sKey, sPath, sDomain) {
     if (!sKey || !this.hasItem(sKey)) { return false; }
     document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + ( sDomain ? "; domain=" + sDomain : "") + ( sPath ? "; path=" + sPath : "");
     return true;
   },
   hasItem: function (sKey) {
-    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+     return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+  },
+
+  keys: function () {
+    var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
+    for (var nIdx = 0; nIdx < aKeys.length; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
+    return aKeys;
   }
 };
 
-// Actions : get, set, remove, keys.
+// Actions : set, remove, key, get.
 var webStorage = function(action, key, value) {
-	
-	// Local Storage detection
-    var hasStorage = (function() {
-      var uid = new Date,
-          hasStorage,
-          result;
-      try {
-        (hasStorage = window.localStorage).setItem(uid, uid);
-        result = hasStorage.getItem(uid) == uid;
-        hasStorage.removeItem(uid);
-        return result && hasStorage;
-      } catch(e) {return false;}
-    }());
-    
-    // Setter and getter
-	switch (action) {
-	  case 'get':
-	    if (hasStorage) {
-			return window.localStorage.getItem(key);
-		} else {
-			return docCookies.getItem(key);
-		}
-	  case 'set':
-		if (hasStorage) {
-			window.localStorage.setItem(key, value);
-		} else {
-			docCookies.setItem(key, value);
-		}
-	    break;
-	  case 'remove':
-	    if (hasStorage) {
-			return window.localStorage.removeItem(key);
-		} else {
-			return docCookies.removeItem(key);
-		}
-	  case 'keys':
+
+  // Local Storage detection
+  var hasStorage = (function() {
+    var uid = new Date,
+      hasStorage,
+      result;
+    try {
+      (hasStorage = window.localStorage).setItem(uid, uid);
+      result = hasStorage.getItem(uid) == uid;
+      hasStorage.removeItem(uid);
+      return result && hasStorage;
+    } catch(e) {return false;}
+  }());
+
+  // Setter and getter
+  switch (action) {
+    case 'get':
+      if (hasStorage) {
+        return window.localStorage.getItem(key);
+      } else {
+        return window.localStorage.getItem(key) || docCookies.getItem(key);
+      }
+    case 'set':
+      if (hasStorage) {
+        window.localStorage.setItem(key, value);
+      } else {
+        docCookies.setItem(key, value);
+      }
+      break;
+    case 'remove':
+      if (hasStorage) {
+        return window.localStorage.removeItem(key);
+      } else {
+        return docCookies.removeItem(key);
+      }
+    case 'clear':
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+
+      break;
+    case 'keys':
       var keyArr = [];
       if (hasStorage) {
          for (key in window.localStorage) {
@@ -80,5 +92,5 @@ var webStorage = function(action, key, value) {
       } else {
         return docCookies.keys();
       }
-	}
-};	
+  }
+};
